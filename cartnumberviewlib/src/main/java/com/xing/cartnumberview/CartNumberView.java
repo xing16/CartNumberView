@@ -3,7 +3,6 @@ package com.xing.cartnumberview;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -18,7 +17,6 @@ import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
-import android.widget.Toast;
 
 /**
  * Created by Administrator on 2017/11/11.
@@ -76,12 +74,12 @@ public class CartNumberView extends View {
     /**
      * 圆角矩形收缩动画
      */
-    private ValueAnimator roundRectShrinkAnim;
+    private ValueAnimator rectToCircleAnim;
 
     /**
      * 圆角矩形变圆形动画
      */
-    private ValueAnimator roundRectToCircleAnim;
+    private ValueAnimator rectToCircleRectAnim;
     /**
      * 圆形展开动画
      */
@@ -185,20 +183,20 @@ public class CartNumberView extends View {
 
     private void initAnimations() {
         // 初始化圆角矩形收缩动画
-        initRoundRectShrinkAnimation();
+        initRectToCircleAnimation();
 
         // 初始化圆角矩形变圆形动画
-        initRoundRectToCircleAnimation();
+        initRectToCircleRectAnimation();
 
         // 圆形展开动画
         initCircleExpandAnimation();
 
         // 初始化动画集合
         animatorSet = new AnimatorSet();
-        animatorSet.play(circleExpandAnim)
-                .after(roundRectToCircleAnim)
-                .after(roundRectShrinkAnim);
 
+        animatorSet.play(rectToCircleAnim)
+                .before(circleExpandAnim)
+                .after(rectToCircleRectAnim);
     }
 
 
@@ -207,10 +205,9 @@ public class CartNumberView extends View {
      */
     private void initCircleExpandAnimation() {
         expandX = mWidth - buttonRadius;
-
         circleExpandAnim = ValueAnimator.ofFloat(mWidth - buttonRadius, buttonRadius);
         circleExpandAnim.setInterpolator(new LinearInterpolator());
-        circleExpandAnim.setDuration(300);
+        circleExpandAnim.setDuration(3000);
         circleExpandAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 
             @Override
@@ -230,24 +227,17 @@ public class CartNumberView extends View {
     }
 
     /**
-     * 初始化圆角矩形变圆形动画
+     * 初始化矩形变圆形矩形动画
      */
-    private void initRoundRectToCircleAnimation() {
-        roundRectToCircleAnim = ValueAnimator.ofFloat(circleAngle, mHeight / 2f);
-        roundRectToCircleAnim.setDuration(300);
-        roundRectToCircleAnim.setInterpolator(new LinearInterpolator());
-        roundRectToCircleAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+    private void initRectToCircleRectAnimation() {
+        rectToCircleRectAnim = ValueAnimator.ofFloat(dp2Px(5), mHeight / 2f);
+        rectToCircleRectAnim.setDuration(3000);
+        rectToCircleRectAnim.setInterpolator(new LinearInterpolator());
+        rectToCircleRectAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                // circleAngle 圆形矩形的圆角半径,从初始值变化到高度的一半(相当于半圆)
                 circleAngle = (float) valueAnimator.getAnimatedValue();
-                invalidate();
-            }
-        });
-        roundRectShrinkAnim.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                isShrinkAnimEnd = true;
                 invalidate();
             }
         });
@@ -255,19 +245,29 @@ public class CartNumberView extends View {
 
 
     /**
-     * 圆角矩形收缩动画
+     * 圆角矩形 -> 圆形
      */
-    private void initRoundRectShrinkAnimation() {
-        roundRectShrinkAnim = ValueAnimator.ofFloat(0, mWidth - mHeight);
-        roundRectShrinkAnim.setDuration(200);
-        roundRectShrinkAnim.setInterpolator(new LinearInterpolator());
-        roundRectShrinkAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+    private void initRectToCircleAnimation() {
+        rectToCircleAnim = ValueAnimator.ofFloat(0, mWidth - mHeight);
+        rectToCircleAnim.setDuration(3000);
+        rectToCircleAnim.setInterpolator(new LinearInterpolator());
+        rectToCircleAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 currentX = (float) valueAnimator.getAnimatedValue();
                 invalidate();
             }
         });
+
+        rectToCircleAnim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                isShrinkAnimEnd = true;
+            }
+        });
+
+
     }
 
 
@@ -295,8 +295,6 @@ public class CartNumberView extends View {
         if (currentX == 0) {
             canvas.drawText(text, mWidth / 2f, baseLine, textPaint);
         }
-
-
     }
 
     private void drawAddSubButton(Canvas canvas) {
