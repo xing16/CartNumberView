@@ -207,7 +207,7 @@ public class CartNumberView extends View {
         expandX = mWidth - buttonRadius;
         circleExpandAnim = ValueAnimator.ofFloat(mWidth - buttonRadius, buttonRadius);
         circleExpandAnim.setInterpolator(new LinearInterpolator());
-        circleExpandAnim.setDuration(3000);
+        circleExpandAnim.setDuration(300);
         circleExpandAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 
             @Override
@@ -231,7 +231,7 @@ public class CartNumberView extends View {
      */
     private void initRectToCircleRectAnimation() {
         rectToCircleRectAnim = ValueAnimator.ofFloat(dp2Px(5), mHeight / 2f);
-        rectToCircleRectAnim.setDuration(3000);
+        rectToCircleRectAnim.setDuration(300);
         rectToCircleRectAnim.setInterpolator(new LinearInterpolator());
         rectToCircleRectAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -249,7 +249,7 @@ public class CartNumberView extends View {
      */
     private void initRectToCircleAnimation() {
         rectToCircleAnim = ValueAnimator.ofFloat(0, mWidth - mHeight);
-        rectToCircleAnim.setDuration(3000);
+        rectToCircleAnim.setDuration(300);
         rectToCircleAnim.setInterpolator(new LinearInterpolator());
         rectToCircleAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
